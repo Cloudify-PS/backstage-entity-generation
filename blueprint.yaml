@@ -1,0 +1,60 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - https://cloudify.co/spec/cloudify/6.3.1/types.yaml
+  # - plugin:cloudify-backstage-entity-generation-plugin
+
+inputs:
+  cloudify_manager_host:
+    type: string
+    description: IP of a Cloudify Manager.
+  repo_path:
+    type: string
+    description: Backstage entity repository on local filesystem.
+    default: /tmp/backstage_entities_test
+  github_token:
+    type: string
+    description: GitHub Token generated for your GitHub user.
+    default: { get_secret: github_token }
+  repo_url:
+    type: string
+    description: >
+      URL of the GitHub repository the Backstage entity definition should
+      be pushed to. Should not contain 'http' nor 'https' prefix.
+    default: github.com/jakubcierlik/backstage_entities_test.git
+    constraints:
+      - pattern: "^(github.com\/)(.)*.git$"
+  branch_name:
+    type: string
+    description: Name of the GitHub repository branch to use.
+    default: main
+  clean_repo:
+    type: boolean
+    description: Clean the repository before uploading files.
+    default: true
+
+deployment_settings:
+  default_schedules:
+    refresh:
+      workflow: execute_operation
+      since: '+1min'
+      recurrence: '1min'
+      workflow_parameters:
+        operation: cloudify.interfaces.lifecycle.start
+        node_ids: [update]
+
+node_templates:
+  update:
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: scripts/refresh_blueprints.py
+          executor: central_deployment_agent
+          inputs:
+            manager_host: { get_input: cloudify_manager_host }
+            repo_path: { get_input: repo_path }
+            github_token: { get_input: github_token }
+            repo_url: { get_input: repo_url }
+            branch_name: { get_input: branch_name }
+            clean_repo: { get_input: clean_repo }
