@@ -1,0 +1,1 @@
+# backstage-entity-generation
