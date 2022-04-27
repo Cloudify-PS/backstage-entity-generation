@@ -22,6 +22,7 @@ metadata:
   description: {description}
   tags:
     - tosca
+    - cloudify
   links:
     - url: https://{manager_ip}/console/page/blueprints_blueprint/{blueprint_id}?c=%5B%7B%22context%22%3A%7B%7D%7D%2C%7B%22context%22%3A%7B%22blueprintId%22%3A%22{blueprint_id}%22%7D%2C%22pageName%22%3A%22{blueprint_id}%22%7D%5D#!
       title: Deploy component
